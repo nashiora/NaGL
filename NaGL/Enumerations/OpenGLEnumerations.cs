@@ -107,6 +107,13 @@ namespace NaGL.Enumerations
         /// </summary>
         SourceAlpha = GL.GL_SRC_ALPHA
     }
+
+    public enum ClearBufferMask : uint
+    {
+        ColorBufferBit = GL.GL_COLOR_BUFFER_BIT,
+        DepthBufferBit = GL.GL_DEPTH_BUFFER_BIT,
+        StencilBufferBit = GL.GL_STENCIL_BUFFER_BIT,
+    }
     
     /// <summary>
     /// The Clip Plane Name

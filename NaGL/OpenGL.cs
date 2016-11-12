@@ -1585,10 +1585,10 @@ namespace NaGL
 		/// This function clears the buffers specified by mask.
 		/// </summary>
 		/// <param name="mask">Which buffers to clear.</param>
-		 public static void Clear(uint mask)
+		 public static void Clear(Enumerations.ClearBufferMask mask)
 		{
 			PreGLCall();
-			glClear(mask);
+			glClear((uint)mask);
 			PostGLCall();
 		}
 
@@ -7722,6 +7722,13 @@ namespace NaGL
         public static void BufferData(uint target, int size, IntPtr data, uint usage)
         {
             GetDelegateFor<glBufferData>()(target, size, data, usage);
+        }
+        public static void BufferData(uint target, int offset, int count, float[] data, uint usage)
+        {
+            IntPtr p = Marshal.AllocHGlobal(count * sizeof(float));
+            Marshal.Copy(data, offset, p, count);
+            GetDelegateFor<glBufferData>()(target, count * sizeof(float), p, usage);
+            Marshal.FreeHGlobal(p);
         }
         public static void BufferData(uint target, float[] data, uint usage)
         {
