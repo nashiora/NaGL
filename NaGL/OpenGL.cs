@@ -109,7 +109,7 @@ namespace NaGL
         /// <summary>
         /// Draws a single, convex polygon. Vertices 1 through N define this polygon.
         /// </summary>
-		public const uint GL_POLYGON                        = 0x0009;
+        public const uint GL_POLYGON                        = 0x0009;
 
 	    //  BlendingFactorDest
 		public const uint GL_ZERO                           = 0;
