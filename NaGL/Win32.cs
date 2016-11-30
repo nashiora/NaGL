@@ -1,20 +1,87 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace NaGL
 {
+    public static class RuntimeInfo
+    {
+        [DllImport(@"kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+        internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+        [DllImport(@"kernel32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        public static bool Is32Bit { get; }
+        public static bool Is64Bit { get; }
+        public static bool IsMono { get; }
+        public static bool IsWindows { get; }
+        public static bool IsUnix { get; }
+        public static bool IsLinux { get; }
+        public static bool IsMacOsx { get; }
+        public static bool IsWine { get; }
+
+        static RuntimeInfo()
+        {
+            IsMono = Type.GetType("Mono.Runtime") != null;
+            int p = (int)Environment.OSVersion.Platform;
+            IsUnix = (p == 4) || (p == 6) || (p == 128);
+            IsWindows = Path.DirectorySeparatorChar == '\\';
+
+            Is32Bit = IntPtr.Size == 4;
+            Is64Bit = IntPtr.Size == 8;
+
+            if (IsUnix)
+            {
+                Process uname = new Process();
+                uname.StartInfo.FileName = "uname";
+                uname.StartInfo.UseShellExecute = false;
+                uname.StartInfo.RedirectStandardOutput = true;
+                uname.Start();
+                string output = uname.StandardOutput.ReadToEnd();
+                uname.WaitForExit();
+
+                output = output.ToUpper().Replace("\n", "").Trim();
+
+                IsMacOsx = output == "DARWIN";
+                IsLinux = output == "LINUX";
+            }
+            else
+            {
+                IsMacOsx = false;
+                IsLinux = false;
+            }
+
+            if (IsWindows)
+            {
+                IntPtr hModule = GetModuleHandle(@"ntdll.dll");
+                if (hModule == IntPtr.Zero)
+                    IsWine = false;
+                else
+                {
+                    IntPtr fptr = GetProcAddress(hModule, @"wine_get_version");
+                    IsWine = fptr != IntPtr.Zero;
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Useful functions imported from the Win32 SDK.
     /// </summary>
 	public static class Win32
-	{
+    {
+        private const int RTLD_LAZY = 0x00001;
+        private const int RTLD_NOW = 0x00002;
+
         /// <summary>
         /// Initializes the <see cref="Win32"/> class.
         /// </summary>
         static Win32()
         {
             //  Load the openGL library - without this wgl calls will fail.
-            IntPtr glLibrary = LoadLibrary(OpenGL32);
+            IntPtr glLibrary = RuntimeInfo.IsLinux ? dlopen(OpenGL32, RTLD_NOW) : LoadLibrary(OpenGL32);
         }
         		
         //  The names of the libraries we're importing.
@@ -23,6 +90,9 @@ namespace NaGL
 		public const string Glu32 = "Glu32.dll";
 		public const string Gdi32 = "gdi32.dll";
 		public const string User32 = "user32.dll";
+
+        [DllImport("libdl.so", SetLastError = true)]
+        public static extern IntPtr dlopen(string filename, int flag);
 
         #region Kernel32 Functions
 
