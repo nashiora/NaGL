@@ -6747,7 +6747,7 @@ namespace NaGL
             Delegate del = null;
             if (extensionFunctions.TryGetValue(name, out del) == false)
             {
-                IntPtr proc = Win32.wglGetProcAddress(name);
+                IntPtr proc = RuntimeInfo.IsWindows ? Win32.wglGetProcAddress(name) : Win32.eglGetProcAddress(name);
                 if (proc == IntPtr.Zero)
                     throw new Exception("Extension function " + name + " not supported");
 
