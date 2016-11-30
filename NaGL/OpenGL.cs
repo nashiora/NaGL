@@ -6724,7 +6724,7 @@ namespace NaGL
         public static bool IsExtensionFunctionSupported(string extensionFunctionName)
         {
             //  Try and get the proc address for the function.
-            IntPtr procAddress = Win32.wglGetProcAddress(extensionFunctionName);
+            IntPtr procAddress = RuntimeInfo.IsWindows ? Win32.wglGetProcAddress(extensionFunctionName) : Win32.eglGetProcAddress(extensionFunctionName);
 
             //  As long as the pointer is non-zero, we can invoke the extension function.
             return procAddress != IntPtr.Zero;

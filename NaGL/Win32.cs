@@ -94,6 +94,14 @@ namespace NaGL
         [DllImport("libdl.so", SetLastError = true)]
         public static extern IntPtr dlopen(string filename, int flag);
 
+        /// <summary>
+        /// Gets a proc address.
+        /// </summary>
+        /// <param name="name">The name of the function.</param>
+        /// <returns>The address of the function.</returns>
+        [DllImport("libEGL.so", SetLastError = true)]
+        public static extern IntPtr eglGetProcAddress(string name);
+
         #region Kernel32 Functions
 
         [DllImport(Kernel32, SetLastError = true)]
